@@ -14,60 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      user_profiles: {
-        Row: {
-          user_id: string
-          name: string
-          email: string
-          role: string
-          can_read: boolean
-          can_write: boolean
-          is_disabled: boolean
-          can_manage_events: boolean
-          can_manage_gallery: boolean
-          can_manage_livestream: boolean
-          can_edit_profile: boolean
-          created_at: string
-          updated_at: string
-          admin_created?: boolean
-          expires_at?: string
-        }
-        Insert: {
-          user_id: string
-          name?: string
-          email: string
-          role?: string
-          can_read?: boolean
-          can_write?: boolean
-          is_disabled?: boolean
-          can_manage_events?: boolean
-          can_manage_gallery?: boolean
-          can_manage_livestream?: boolean
-          can_edit_profile?: boolean
-          created_at?: string
-          updated_at?: string
-          admin_created?: boolean
-          expires_at?: string
-        }
-        Update: {
-          user_id?: string
-          name?: string
-          email?: string
-          role?: string
-          can_read?: boolean
-          can_write?: boolean
-          is_disabled?: boolean
-          can_manage_events?: boolean
-          can_manage_gallery?: boolean
-          can_manage_livestream?: boolean
-          can_edit_profile?: boolean
-          created_at?: string
-          updated_at?: string
-          admin_created?: boolean
-          expires_at?: string
-        }
-        Relationships: []
-      }
       admin_users: {
         Row: {
           created_at: string
@@ -94,7 +40,7 @@ export type Database = {
       }
       events: {
         Row: {
-          created_at: string
+          created_at: string | null
           description: string | null
           event_date: string
           event_time: string | null
@@ -103,10 +49,10 @@ export type Database = {
           image_url: string | null
           is_featured: boolean | null
           title: string
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           event_date: string
           event_time?: string | null
@@ -115,10 +61,10 @@ export type Database = {
           image_url?: string | null
           is_featured?: boolean | null
           title: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           event_date?: string
           event_time?: string | null
@@ -127,46 +73,49 @@ export type Database = {
           image_url?: string | null
           is_featured?: boolean | null
           title?: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       gallery_photos: {
         Row: {
           category: string | null
-          created_at: string
+          created_at: string | null
           description: string | null
           display_order: number | null
           id: string
           image_url: string
           is_featured: boolean | null
           show_on_home_page: boolean | null
+          show_on_homepage: boolean | null
           title: string | null
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           category?: string | null
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           display_order?: number | null
           id?: string
           image_url: string
           is_featured?: boolean | null
           show_on_home_page?: boolean | null
+          show_on_homepage?: boolean | null
           title?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           category?: string | null
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           display_order?: number | null
           id?: string
           image_url?: string
           is_featured?: boolean | null
           show_on_home_page?: boolean | null
+          show_on_homepage?: boolean | null
           title?: string | null
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -176,7 +125,7 @@ export type Database = {
           is_live: boolean | null
           stream_description: string | null
           stream_title: string | null
-          updated_at: string
+          updated_at: string | null
           youtube_embed_url: string | null
         }
         Insert: {
@@ -184,7 +133,7 @@ export type Database = {
           is_live?: boolean | null
           stream_description?: string | null
           stream_title?: string | null
-          updated_at?: string
+          updated_at?: string | null
           youtube_embed_url?: string | null
         }
         Update: {
@@ -192,8 +141,113 @@ export type Database = {
           is_live?: boolean | null
           stream_description?: string | null
           stream_title?: string | null
-          updated_at?: string
+          updated_at?: string | null
           youtube_embed_url?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: number
+          is_active: boolean | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: never
+          is_active?: boolean | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: never
+          is_active?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          admin_created: boolean | null
+          can_edit_profile: boolean | null
+          can_manage_events: boolean | null
+          can_manage_gallery: boolean | null
+          can_manage_livestream: boolean | null
+          can_manage_users: boolean | null
+          can_read: boolean | null
+          can_write: boolean | null
+          created_at: string | null
+          created_by: boolean | null
+          email: string | null
+          expires_at: string | null
+          is_disabled: boolean | null
+          is_main_admin: boolean | null
+          name: string | null
+          role: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_created?: boolean | null
+          can_edit_profile?: boolean | null
+          can_manage_events?: boolean | null
+          can_manage_gallery?: boolean | null
+          can_manage_livestream?: boolean | null
+          can_manage_users?: boolean | null
+          can_read?: boolean | null
+          can_write?: boolean | null
+          created_at?: string | null
+          created_by?: boolean | null
+          email?: string | null
+          expires_at?: string | null
+          is_disabled?: boolean | null
+          is_main_admin?: boolean | null
+          name?: string | null
+          role?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_created?: boolean | null
+          can_edit_profile?: boolean | null
+          can_manage_events?: boolean | null
+          can_manage_gallery?: boolean | null
+          can_manage_livestream?: boolean | null
+          can_manage_users?: boolean | null
+          can_read?: boolean | null
+          can_write?: boolean | null
+          created_at?: string | null
+          created_by?: boolean | null
+          email?: string | null
+          expires_at?: string | null
+          is_disabled?: boolean | null
+          is_main_admin?: boolean | null
+          name?: string | null
+          role?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          id: string
+          is_active: boolean | null
+          is_operator: boolean | null
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean | null
+          is_operator?: boolean | null
+        }
+        Update: {
+          id?: string
+          is_active?: boolean | null
+          is_operator?: boolean | null
         }
         Relationships: []
       }
@@ -202,7 +256,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      disable_expired_temp_users: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
