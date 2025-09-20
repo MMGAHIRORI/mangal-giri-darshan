@@ -46,10 +46,12 @@ export const createTempUser = async (
   const expiresAt = new Date();
   expiresAt.setHours(expiresAt.getHours() + 24);
 
-  // Update user profile with temporary admin creator role
+  // Create/update user profile with temporary admin creator role
   const { error: roleError } = await supabase
     .from('user_profiles')
-    .update({ 
+    .upsert({ 
+      user_id: data.user.id,
+      email: email,
       role: 'temp_admin_creator',
       name: name,
       can_read: false,
@@ -57,8 +59,9 @@ export const createTempUser = async (
       is_disabled: false,
       admin_created: false,
       expires_at: expiresAt.toISOString()
-    })
-    .eq('user_id', data.user.id);
+    }, {
+      onConflict: 'user_id'
+    });
 
   if (roleError) {
     throw new Error(roleError.message);
@@ -144,14 +147,24 @@ export const createAdminFromTempUser = async (
   // Set admin role and full privileges
   const { error: adminRoleError } = await supabase
     .from('user_profiles')
-    .update({ 
+    .upsert({ 
+      user_id: data.user.id,
+      email: adminEmail,
       role: 'admin',
       name: adminName,
       can_read: true,
       can_write: true,
-      is_disabled: false
-    })
-    .eq('user_id', data.user.id);
+      is_disabled: false,
+      can_manage_events: true,
+      can_manage_gallery: true,
+      can_manage_livestream: true,
+      can_edit_profile: true,
+      can_manage_users: true,
+      is_main_admin: false,
+      admin_created: false
+    }, {
+      onConflict: 'user_id'
+    });
 
   if (adminRoleError) {
     throw new Error(adminRoleError.message);
@@ -160,7 +173,13 @@ export const createAdminFromTempUser = async (
   // Also add to admin_users table for backward compatibility
   const { error: adminError } = await supabase
     .from("admin_users")
-    .insert({ user_id: data.user.id, email: adminEmail, role: "admin" });
+    .upsert({ 
+      user_id: data.user.id, 
+      email: adminEmail, 
+      role: "admin" 
+    }, {
+      onConflict: 'user_id'
+    });
 
   if (adminError) {
     console.warn('admin_users insert failed', adminError);

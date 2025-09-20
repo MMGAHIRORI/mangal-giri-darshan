@@ -4,7 +4,7 @@ export type UserProfile = {
   user_id: string;
   name: string;
   email: string;
-  role: "user" | "admin" | "operator" | "super_admin";
+  role: "user" | "admin" | "operator" | "super_admin" | "temp_admin_creator";
   can_read: boolean;
   can_write: boolean;
   is_disabled: boolean;
@@ -15,6 +15,8 @@ export type UserProfile = {
   can_manage_users?: boolean;
   is_main_admin?: boolean;
   created_by?: string;
+  admin_created?: boolean;
+  expires_at?: string;
   created_at: string;
   updated_at: string;
 };
@@ -26,8 +28,8 @@ export const getCurrentProfile = async (): Promise<UserProfile | null> => {
     .from("user_profiles")
     .select("*")
     .eq("user_id", session.user.id)
-    .single();
-  return (data as UserProfile) || null;
+    .maybeSingle();
+  return data as unknown as UserProfile || null;
 };
 
 export const listAllProfiles = async (): Promise<UserProfile[]> => {
@@ -36,7 +38,7 @@ export const listAllProfiles = async (): Promise<UserProfile[]> => {
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data as UserProfile[]) || [];
+  return (data as unknown as UserProfile[]) || [];
 };
 
 export const updateUserRole = async (userId: string, role: "user" | "admin" | "operator" | "super_admin") => {

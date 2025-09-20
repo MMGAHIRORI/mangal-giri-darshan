@@ -13,8 +13,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-    // Set session timeout to 2 hours (7200 seconds)
-    sessionRefreshInterval: 300, // Refresh session every 5 minutes
     // Detect when tab becomes visible to check session
     detectSessionInUrl: true,
   },

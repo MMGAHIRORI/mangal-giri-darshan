@@ -37,10 +37,6 @@ export const createAdminUser = async (
     throw new Error("User sign up failed");
   }
 
-  // Get current user to set as creator
-  const { data: { session } } = await supabase.auth.getSession();
-  const createdBy = session?.user?.id || null;
-  
   // Set default permissions based on role
   const defaultPermissions = {
     can_read: true,
@@ -52,77 +48,41 @@ export const createAdminUser = async (
     can_manage_users: role === 'admin', // Admins can manage users by default
     is_disabled: false,
     is_main_admin: false, // New users are never main admin
-    created_by: createdBy
+    admin_created: false
   };
 
   // Override with custom permissions if provided
   const finalPermissions = permissions ? { ...defaultPermissions, ...permissions } : defaultPermissions;
 
-  // First, check if profile already exists
-  const { data: existingProfiles } = await supabase
+  // Create or update user profile using upsert for better reliability
+  console.log('Creating/updating user profile...');
+  const { error: upsertError } = await supabase
     .from('user_profiles')
-    .select('*')
-    .eq('user_id', data.user.id);
+    .upsert({
+      user_id: data.user.id,
+      email: email,
+      name: email.split('@')[0], // Use email prefix as default name
+      role,
+      ...finalPermissions
+    }, {
+      onConflict: 'user_id'
+    });
   
-  let profileUpdated = false;
-  
-  if (existingProfiles && existingProfiles.length > 0) {
-    // Profile exists, update it
-    console.log('Profile exists, updating...');
-    const { error: updateError } = await supabase
-      .from('user_profiles')
-      .update({ 
-        role,
-        ...finalPermissions
-      })
-      .eq('user_id', data.user.id);
-    
-    if (updateError) {
-      throw new Error(`Failed to update user profile: ${updateError.message}`);
-    }
-    profileUpdated = true;
-  } else {
-    // No profile exists, create one
-    console.log('No profile exists, creating new one...');
-    const { error: insertError } = await supabase
-      .from('user_profiles')
-      .insert({
-        user_id: data.user.id,
-        email: email,
-        name: email.split('@')[0], // Use email prefix as default name
-        role,
-        ...finalPermissions
-      });
-    
-    if (insertError) {
-      // Try with upsert as fallback
-      console.log('Insert failed, trying upsert...');
-      const { error: upsertError } = await supabase
-        .from('user_profiles')
-        .upsert({
-          user_id: data.user.id,
-          email: email,
-          name: email.split('@')[0],
-          role,
-          ...finalPermissions
-        });
-      
-      if (upsertError) {
-        throw new Error(`Failed to create user profile: ${upsertError.message}`);
-      }
-    }
-    profileUpdated = true;
-  }
-
-  if (!profileUpdated) {
-    throw new Error('Failed to update user profile after multiple attempts');
+  if (upsertError) {
+    throw new Error(`Failed to create/update user profile: ${upsertError.message}`);
   }
 
   // Add to admin_users table for admin and operator roles
   if (role === 'admin' || role === 'operator') {
     const { error: adminError } = await supabase
       .from("admin_users")
-      .insert({ user_id: data.user.id, email, role });
+      .upsert({ 
+        user_id: data.user.id, 
+        email, 
+        role 
+      }, {
+        onConflict: 'user_id'
+      });
     if (adminError) {
       // Ignore soft-fail for legacy table to avoid blocking flow
       console.warn('admin_users insert failed', adminError);

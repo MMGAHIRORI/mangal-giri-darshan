@@ -33,11 +33,11 @@ export const useAuthGuard = () => {
           .from('user_profiles')
           .select('role')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
 
         if (!isActive) return; // Component unmounted
 
-        if (!profile || !['admin', 'super_admin', 'operator', 'temp_admin_creator'].includes(profile.role)) {
+        if (!profile || !['admin', 'super_admin', 'operator', 'temp_admin_creator'].includes(profile?.role)) {
           console.log('User does not have admin privileges, logging out');
           await supabase.auth.signOut();
           clearAuthState();
